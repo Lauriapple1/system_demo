@@ -1,0 +1,70 @@
+phpMyAdmin - Readme
+===================
+
+Version 3.5.2
+
+A set of PHP-scripts to manage MySQL over the web.
+
+http://www.phpmyadmin.net/
+
+Copyright
+---------
+
+Copyright (C) 1998-2000
+    Tobias Ratschiller <tobias_at_ratschiller.com>
+
+Copyright (C) 2001-2012
+    Marc Delisle <marc_at_infomarc.info>
+    Olivier Müller <om_at_omnis.ch>
+    Robin Johnson <robbat2_at_users.sourceforge.net>
+    Alexander M. Turek <me_at_derrabus.de>
+    Michal Čihař <michal_at_cihar.com>
+    Garvin Hicking <me_at_supergarv.de>
+    Michael Keck <mkkeck_at_users.sourceforge.net>
+    Sebastian Mendel <cybot_tm_at_users.sourceforge.net>
+    [check Documentation.txt/.html file for more details]
+
+License
+-------
+
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License version 2, as published by the
+Free Software Foundation.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Requirements
+------------
+
+* PHP 5.2 or later
+* MySQL 5.0 or later
+* a web-browser (doh!)
+
+Summary
+-------
+In this branch of phpMyAdmin (specific to use with cloudfoundry based PaaS) you 
+will need to modify the htpasswd file before pushing your application to the 
+cloud.
+
+Steps
+-------
+
+1. Clone this repo locally => 
+git clone https://github.com/appfog/af-php-myadmin.git
+
+2. Cd into the git repository => 
+cd af-php-myadmin/
+
+3. run htpasswd to set your basic auth => 
+htpasswd .htpasswd <username>
+
+4. Push the application to your cloud foundry based PaaS => 
+af push <app_name> 
+
+4a. Remember to bind the database you want to manage to this app!
