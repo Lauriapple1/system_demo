@@ -8,6 +8,7 @@ lodash = require "lodash"
 # Environment variables.
 env = process.env
 vcap = env.VCAP_SERVICES
+vcap = JSON.parse(vcap) if vcap?
 
 # Global variables.
 machines = []
@@ -50,8 +51,7 @@ app.get "/", (req, res) ->
 
 # Set MySQL prefs.
 mysql = require "mysql-native"
-mysqlDetails = vcap?["mysql-5.1"]?[0]["credentials"]
-mysqlDetails = {host: "10.111.144.186", port: 3306, name: "cmdb", username: "zalando", password: "Rck04nat"}
+mysqlDetails = vcap["mysql-5.1"][0]["credentials"]
 
 # Set MySQL object.
 db = require("mysql-native").createTCPClient mysqlDetails.host, mysqlDetails.port
@@ -158,9 +158,7 @@ randomizeCmdbData = ->
     query = db.query("SELECT H.*,
               M.cpu_load AS machine_cpu_load,
               M.ram_total AS machine_ram_total,
-              M.ram_free AS machine_ram_free,
               M.disk_total AS machine_disk_total,
-              M.disk_free AS machine_disk_free,
               M.disk_load AS machine_disk_load
               FROM cmdb_machine M, cmdb_host H WHERE M.id = H.machine_id")
 
