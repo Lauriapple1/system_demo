@@ -1,12 +1,12 @@
 {
-    "name":"systemapp",
-    "version":"0.6.3",
-    "description":"A sleek and smart infrastructure mapping and monitoring tool by Zalando.",
+    "name":"systemappbw",
+    "version":"0.1.0",
+    "description":"System App Demo - Background Workers.",
     "homepage": "http://systemapp.io",
     "author":"Igor Ramadas <igor.ramadas@zalando.de>",
     "license":"Apache License 2.0",
 
-    "main":"index.js",
+    "main":"index",
 
     "contributors":[
         {
@@ -17,21 +17,11 @@
 
     "dependencies":{
         "coffee-script":">= 1.6.2",
-        "connect-assets":">= 2.2.1",
         "express":">= 2.5.11",
-        "imagemagick":">= 0.1.3",
-        "jade":">= 0.26.3",
         "lodash":">= 1.2.1",
         "moment":">= 2.0.0",
-        "passport":">= 0.1.16",
-        "passport-ldap":">= 0.0.1",
-        "passport-http":">= 0.2.1",
         "lodash":">= 1.0.0",
-        "mongoskin":">= 0.3.7",
-        "node-logentries":">= 0.1.0",
-        "socket.io":">= 0.9.6",
-        "stylus":">= 0.27.2",
-        "winston":">= 0.6.1"
+        "mysql-native":">= 0.4.7"
     },
 
     "engines":{
@@ -49,6 +39,6 @@
 
     "repository":{
         "type":"git",
-        "url":"https://github.com/zalando/system"
+        "url":"https://github.com/zalando/system_demo"
     }
 }
