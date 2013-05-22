@@ -11,13 +11,14 @@ $db = $mysql_config["name"];
 $link = mysql_connect("$hostname:$port", $username, $password);
 $db_selected = mysql_select_db($db, $link);
 
-$qs = $_GET["q"];
-$role = $_GET["role"];
-
-if ($role != "")
-    $rs = mysql_query("SELECT * FROM cmdb_" . $qs);
-else
-    $rs = mysql_query("SELECT * FROM cmdb_" . $qs . " WHERE role_id IN(" . $role . "));
+$rs = mysql_query("SELECT H.*,
+                   M.datacenter_id,
+                   M.title AS machine_title,
+                   M.cpu_load AS machine_cpu_load,
+                   M.ram_total AS machine_ram_total,
+                   M.disk_total AS machine_disk_total,
+                   M.disk_load AS machine_disk_load
+                   FROM cmdb_machine M, cmdb_host H WHERE M.id = H.machine_id");
 
 function mysql2json($mysql_result) {
      $json="[\n";

@@ -63,13 +63,13 @@ updateHosts = ->
     console.warn "updateHosts()"
     batchHosts = ""
 
-    # For each machine, 15% chances of not updating host data.
+    # For each machine, 30% chances of not updating host data.
     for h in hosts
-        if Math.random() > 0.15
+        if Math.random() > 0.3
 
-            # CPU load between 0 and 2. If more than 1.2, recalculate once more.
+            # CPU load between 0 and 2. If more than 1, recalculate once more.
             cpuLoad = 2 * Math.random()
-            cpuLoad = 2 * Math.random() if cpuLoad > 1.2
+            cpuLoad = 2 * Math.random() if cpuLoad > 1
             cpuLoad = cpuLoad.toFixed 2
 
             # Free RAM changes by up to 50%. If reaches less than 10% total, get a new random value.
@@ -106,13 +106,11 @@ updateHosts = ->
             # Add to batch host update.
             q = "UPDATE cmdb_host SET cpu_load='#{cpuLoad}', ram_free='#{ramFree}', disk_free='#{diskFree}', disk_load='#{diskLoad}', requests_sec='#{requestsSec}' WHERE id = #{h.id};"
             batchHosts += q + "\n";
-            console.warn "Buffer: ", q
         else
-            console.warn "Skip host: ", h.id
+            batchMachines += "Skipped host #{h.id};\n";
 
     # Execute batch update for machines.
     db.query batchHosts
-    console.warn "Hosts updated!"
 
 # Helper to update machine data.
 updateMachines = ->
@@ -138,20 +136,17 @@ updateMachines = ->
             # Add to batch machine update.
             q = "UPDATE cmdb_machine SET cpu_load='#{cpuLoad}', disk_load='#{diskLoad}' WHERE id = #{m.machine_id};"
             batchMachines += q + "\n";
-            console.warn "Buffer: ", q
         else
-            console.warn "Skip machine: ", m.machine_id
+            batchMachines += "Skipped machine #{m.machine_id};\n";
 
     # Execute batch update for machines.
     db.query batchMachines
-    console.warn "Machines updated!"
 
     # Now update hosts.
     updateHosts()
 
 # Randomize CPU, RAM and Disk data on the CMDB demo database.
 randomizeCmdbData = ->
-    console.warn "randomizeCmdbData()"
     hosts = []
     machines = []
 
