@@ -33,7 +33,7 @@ function mysql2json($mysql_result) {
 
      $rows = mysql_num_rows($mysql_result);
 
-     for ($x = 0; $ x< $rows; $x++) {
+     for ($x = 0; $x < $rows; $x++) {
           $row = mysql_fetch_array($mysql_result);
           $json .= "{\n";
           for($y = 0; $y < count($field_names); $y++) {

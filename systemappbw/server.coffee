@@ -63,9 +63,9 @@ updateHosts = ->
     console.warn "updateHosts()"
     batchHosts = ""
 
-    # For each machine, 30% chances of not updating host data.
+    # For each machine, 20% chances of not updating host data.
     for h in hosts
-        if Math.random() > 0.3
+        if Math.random() > 0.2
 
             # CPU load between 0 and 2. If more than 1, recalculate once more.
             cpuLoad = 2 * Math.random()
@@ -107,7 +107,7 @@ updateHosts = ->
             q = "UPDATE cmdb_host SET cpu_load='#{cpuLoad}', ram_free='#{ramFree}', disk_free='#{diskFree}', disk_load='#{diskLoad}', requests_sec='#{requestsSec}' WHERE id = #{h.id};"
             batchHosts += q + "\n";
         else
-            batchMachines += "Skipped host #{h.id};\n";
+            batchHosts += "# Skipped host #{h.id};\n";
 
     # Execute batch update for machines.
     db.query batchHosts
@@ -119,9 +119,9 @@ updateMachines = ->
 
     machines = lodash.unique hosts, "machine_id"
 
-    # For each machine, 30% chances of not updating machine data.
+    # For each machine, 20% chances of not updating machine data.
     for m in machines
-        if Math.random() > 0.3
+        if Math.random() > 0.2
 
             # CPU load between 0 and 2. If more than 1.5, recalculate once more.
             cpuLoad = 3 * Math.random()
@@ -137,7 +137,7 @@ updateMachines = ->
             q = "UPDATE cmdb_machine SET cpu_load='#{cpuLoad}', disk_load='#{diskLoad}' WHERE id = #{m.machine_id};"
             batchMachines += q + "\n";
         else
-            batchMachines += "Skipped machine #{m.machine_id};\n";
+            batchMachines += "# Skipped machine #{m.machine_id};\n";
 
     # Execute batch update for machines.
     db.query batchMachines

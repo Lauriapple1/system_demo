@@ -11,14 +11,7 @@ $db = $mysql_config["name"];
 $link = mysql_connect("$hostname:$port", $username, $password);
 $db_selected = mysql_select_db($db, $link);
 
-$rs = mysql_query("SELECT H.*,
-                   M.datacenter_id,
-                   M.title AS machine_title,
-                   M.cpu_load AS machine_cpu_load,
-                   M.ram_total AS machine_ram_total,
-                   M.disk_total AS machine_disk_total,
-                   M.disk_load AS machine_disk_load
-                   FROM cmdb_machine M, cmdb_host H WHERE M.id = H.machine_id");
+$rs = mysql_query("SELECT H.*, M.datacenter_id, M.title AS machine_title, M.cpu_load AS machine_cpu_load, M.ram_total AS machine_ram_total, M.disk_total AS machine_disk_total, M.disk_load AS machine_disk_load FROM cmdb_machine M, cmdb_host H WHERE M.id = H.machine_id");
 
 function mysql2json($mysql_result) {
      $json="[\n";
@@ -34,7 +27,7 @@ function mysql2json($mysql_result) {
      
      $rows = mysql_num_rows($mysql_result);
      
-     for ($x = 0; $ x< $rows; $x++) {
+     for ($x = 0; $x < $rows; $x++) {
           $row = mysql_fetch_array($mysql_result);
           $json .= "{\n";
           for($y = 0; $y < count($field_names); $y++) {
