@@ -75,9 +75,9 @@ updateHosts = ->
                 if statusRandom > 0.17 and statusRandom < 0.19
                     statusId = 6
 
-            # If host is in maintenance, 30% chances of putting it available.
+            # If host is in maintenance, 40% chances of putting it available.
             else if h["status_id"] is 6
-                if statusRandom > 0.4 and statusRandom < 0.7
+                if statusRandom > 0.4 and statusRandom < 0.8
                     statusId = 5
 
             # Only update hosts if they're status 4, 5 or 6
