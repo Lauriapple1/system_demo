@@ -17,7 +17,7 @@ $role = $_GET["role"];
 if (empty($role)) {
     $rs = mysql_query("SELECT * FROM cmdb_" . $qs);
 } else {
-    $rs = mysql_query("SELECT * FROM cmdb_" . $qs . " WHERE role_id IN(" . $role . ")");
+    $rs = mysql_query("SELECT H.*, R.description AS role_description, S.description AS status_description FROM cmdb_" . $qs . " H, cmdb_status R, cmdb_status S WHERE role_id IN(" . $role . ") AND H.role_id = R.id AND H.status_id = S.id");
 }
 
 function mysql2json($mysql_result) {

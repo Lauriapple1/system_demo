@@ -63,49 +63,64 @@ updateHosts = ->
     console.warn "updateHosts()"
     batchHosts = ""
 
-    # For each machine, 20% chances of not updating host data.
+    # For each machine, 10% chances of not updating host data.
     for h in hosts
-        if Math.random() > 0.2
+        if Math.random() > 0.1
 
-            # CPU load between 0 and 2. If more than 1, recalculate once more.
-            cpuLoad = 2 * Math.random()
-            cpuLoad = 2 * Math.random() if cpuLoad > 1
-            cpuLoad = cpuLoad.toFixed 2
+            statusId = h["status_id"]
+            statusRandom = Math.random()
 
-            # Free RAM changes by up to 50%. If reaches less than 10% total, get a new random value.
-            ramFree = h["ram_free"] * Math.random() * 0.5
-            if Math.random() > 0.5
-                ramFree = h["ram_free"] + ramFree
-            else
-                ramFree = h["ram_free"] - ramFree
-            ramFree = h["ram_total"] * Math.random() if ramFree < h["ram_total"] / 10
-            ramFree = ramFree.toFixed 2
+            # If host is available, 2% chances of putting in under maintenance.
+            if h["status_id"] is 5
+                if statusRandom > 0.17 and statusRandom < 0.19
+                    statusId = 6
 
-            # Free disk space changes by up to 50%. If reaches less than 10% total, get a new random value.
-            diskFree = h["disk_free"] * Math.random() * 0.5
-            if Math.random() > 0.5
-                diskFree = h["disk_free"] + diskFree
-            else
-                diskFree = h["disk_free"] - diskFree
-            diskFree = h["disk_total"] * Math.random() if ramFree < h["ram_total"] / 10
-            diskFree = diskFree.toFixed 2
+            # If host is in maintenance, 30% chances of putting it available.
+            else if h["status_id"] is 6
+                if statusRandom > 0.4 and statusRandom < 0.7
+                    statusId = 5
 
-            # Disk load between 0 and 1. If more than 80%, recalculate once more.
-            diskLoad = 1 * Math.random()
-            diskLoad = 1 * Math.random() if diskLoad > 0.8
-            diskLoad = diskLoad.toFixed 2
+            # Only update hosts if they're status 4, 5 or 6
+            if statusId >= 4 and statusId <= 6
+                # CPU load between 0 and 2. If more than 1, recalculate once more.
+                cpuLoad = 2 * Math.random()
+                cpuLoad = 2 * Math.random() if cpuLoad > 1
+                cpuLoad = cpuLoad.toFixed 2
 
-            # Set random requests per second, changing by up to 30%, and if more than 1000, recalculate.
-            requestsSec = h["requests_sec"] * Math.random() * 0.3
-            if Math.random() > 0.5
-                requestsSec = h["requests_sec"] + requestsSec
-            else
-                requestsSec = h["requests_sec"] - requestsSec
-            requestsSec = 1000 * Math.random() if requestsSec > 1000
+                # Free RAM changes by up to 50%. If reaches less than 10% total, get a new random value.
+                ramFree = h["ram_free"] * Math.random() * 0.5
+                if Math.random() > 0.5
+                    ramFree = h["ram_free"] + ramFree
+                else
+                    ramFree = h["ram_free"] - ramFree
+                ramFree = h["ram_total"] * Math.random() if ramFree < h["ram_total"] / 10 or ramFree >= h["ram_total"]
+                ramFree = ramFree.toFixed 2
 
-            # Add to batch host update.
-            q = "UPDATE cmdb_host SET cpu_load='#{cpuLoad}', ram_free='#{ramFree}', disk_free='#{diskFree}', disk_load='#{diskLoad}', requests_sec='#{requestsSec}' WHERE id = #{h.id};"
-            batchHosts += q + "\n";
+                # Free disk space changes by up to 50%. If reaches less than 10% total, get a new random value.
+                diskFree = h["disk_free"] * Math.random() * 0.5
+                if Math.random() > 0.5
+                    diskFree = h["disk_free"] + diskFree
+                else
+                    diskFree = h["disk_free"] - diskFree
+                diskFree = h["disk_total"] * Math.random() if diskFree < h["disk_total"] / 10 or diskFree >= h["disk_total"]
+                diskFree = diskFree.toFixed 2
+
+                # Disk load between 0 and 1. If more than 80%, recalculate once more.
+                diskLoad = 1 * Math.random()
+                diskLoad = 1 * Math.random() if diskLoad > 0.8
+                diskLoad = diskLoad.toFixed 2
+
+                # Set random requests per second, changing by up to 30%, and if more than 1000, recalculate.
+                requestsSec = h["requests_sec"] * Math.random() * 0.3
+                if Math.random() > 0.5
+                    requestsSec = h["requests_sec"] + requestsSec
+                else
+                    requestsSec = h["requests_sec"] - requestsSec
+                requestsSec = 1000 * Math.random() if requestsSec > 1000
+
+                # Add to batch host update.
+                q = "UPDATE cmdb_host SET cpu_load='#{cpuLoad}', ram_free='#{ramFree}', disk_free='#{diskFree}', disk_load='#{diskLoad}', requests_sec='#{requestsSec}', status_id='#{statusId}' WHERE id = #{h.id};"
+                batchHosts += q + "\n";
         else
             batchHosts += "# Skipped host #{h.id};\n";
 
