@@ -66,7 +66,6 @@ class Bw
 
     # Helper to update host data.
     updateHosts = ->
-        console.warn "updateHosts()"
         batchHosts = ""
 
         # For each machine, 10% chances of not updating host data.
@@ -137,7 +136,6 @@ class Bw
 
     # Helper to update machine data.
     updateMachines = ->
-        console.warn "updateMachines()"
         batchMachines = ""
 
         machines = lodash.unique hosts, "machine_id"
@@ -184,6 +182,8 @@ class Bw
         query.on "row", (r) -> hosts.push r
         query.on "end", -> updateMachines()
 
+        console.info "randomizeCmdbData()"
+
 
     # MONGODB DATA
     # --------------------------------------------------------------------------
@@ -196,20 +196,20 @@ class Bw
 
     # Delete demo maps created by users older than 2 hours.
     deleteMaps = ->
-        minDate = moment().subtract "h", 2
-        options = {"dateCreated": {"$lt": minDate}, "isReadOnly": false}
+        minDate = moment().subtract("h", 2).toJSON()
+        options = {$and: [{dateCreated: {$lt: minDate}}, {isReadOnly: false}]}
         mongoDb.collection("map").remove options, (err, result) =>
             if err?
                 lastMongoDelete = JSON.stringify err
             else
                 lastMongoDelete = moment().format "DD.MM.YYYY hh:mm:ss"
 
-            console.warn "deleteMaps()", err, result
+            console.info "deleteMaps()", minDate, result
 
 
     # SCHEDULED TASKS
     # --------------------------------------------------------------------------
-    console.warn "Starting scheduled tasks..."
+    console.info "Starting scheduled tasks..."
     setInterval randomizeCmdbData, 3000
     setInterval deleteMaps, 60000
 
