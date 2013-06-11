@@ -1,6 +1,6 @@
 {
     "name":"systemappbw",
-    "version":"0.1.4",
+    "version":"0.1.6",
     "description":"System App Demo - Background Workers.",
     "homepage": "http://systemapp.io",
     "author":"Igor Ramadas <igor.ramadas@zalando.de>",

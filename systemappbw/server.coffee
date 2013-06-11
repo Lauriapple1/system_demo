@@ -43,26 +43,55 @@ class Bw
     else
         server.listen port
 
-    # Set routes.
+    # Set MongoDB connection.
+    if vcap?["mongodb-1.8"]?
+        connString = vcap["mongodb-1.8"]
+        connString = connString[0]["credentials"]
+        connString = "mongodb://#{connString.hostname}:#{connString.port}/#{connString.db}"
+    else
+        connString = "mongodb://localhost/systemapp"
+
+    # Create MongoDB object.
+    mongoDb = mongo.db connString, {fsync: false}
+
+    # Set MySQL object.
+    if vcap?["mysql-5.1"]?
+        mysql = require "mysql-native"
+        mysqlDetails = vcap["mysql-5.1"][0]["credentials"]
+        mysqlDb = require("mysql-native").createTCPClient mysqlDetails.host, mysqlDetails.port
+        mysqlDb.auto_prepare = true
+        mysqlDb.auth mysqlDetails.name, mysqlDetails.username, mysqlDetails.password
+
+    # Main index route.
     app.get "/", (req, res) ->
         html = "<div>Last CMDB randomize: #{lastCmdbUpdate}</div> <div>#{batchMachines}</div> <div>#{batchHosts}</div> <br /><hr /> <div><strong>User maps last cleaned:</strong> #{lastMongoDelete}.</div>"
 
         fs.readFile "./index.html", (err, data) ->
+            html = "<h3>Last updates</h3>" + html
             html = data.toString().replace "[[output]]", html
             res.send html
+
+    # Demp maps info route.
+    app.get "/maps", (req, res) ->
+        mongoDb.collection("map").find().toArray (err, data) ->
+            html = ""
+
+            if err?
+                html = JSON.stringify err
+            else
+                for d in data
+                    html += "<div><strong>#{d.name}</strong><br />"
+                    html += "#{d.shapes.length} shapes and #{d.links.length} links.<br />"
+                    html += "Read-only #{d.isReadOnly}, created on #{d.dateCreated} by user #{d.createdByUserId}.</div>"
+
+            fs.readFile "./index.html", (err, data) ->
+                html = "<h3>Current demo maps</h3>" + html
+                html = data.toString().replace "[[output]]", html
+                res.send html
 
 
     # MYSQL DATA
     # --------------------------------------------------------------------------
-
-    # Set MySQL prefs.
-    mysql = require "mysql-native"
-    mysqlDetails = vcap["mysql-5.1"][0]["credentials"]
-
-    # Set MySQL object.
-    mysqlDb = require("mysql-native").createTCPClient mysqlDetails.host, mysqlDetails.port
-    mysqlDb.auto_prepare = true
-    mysqlDb.auth mysqlDetails.name, mysqlDetails.username, mysqlDetails.password
 
     # Helper to update host data.
     updateHosts = ->
@@ -171,16 +200,18 @@ class Bw
         hosts = []
         machines = []
 
-        query = mysqlDb.query("SELECT H.*,
-                  M.cpu_load AS machine_cpu_load,
-                  M.ram_total AS machine_ram_total,
-                  M.disk_total AS machine_disk_total,
-                  M.disk_load AS machine_disk_load
-                  FROM cmdb_machine M, cmdb_host H WHERE M.id = H.machine_id")
-
-        # Populate hosts collection and start updating on end.
-        query.on "row", (r) -> hosts.push r
-        query.on "end", -> updateMachines()
+        if mysqlDb?
+            # Populate hosts collection and start updating on end.
+            query = mysqlDb.query("SELECT H.*,
+                      M.cpu_load AS machine_cpu_load,
+                      M.ram_total AS machine_ram_total,
+                      M.disk_total AS machine_disk_total,
+                      M.disk_load AS machine_disk_load
+                      FROM cmdb_machine M, cmdb_host H WHERE M.id = H.machine_id")
+            query.on "row", (r) -> hosts.push r
+            query.on "end", -> updateMachines()
+        else
+            batchMachines = "No MySQL connection available!"
 
         console.info "randomizeCmdbData()"
 
@@ -188,16 +219,12 @@ class Bw
     # MONGODB DATA
     # --------------------------------------------------------------------------
 
-    # Set MongoDB connection.
-    connString = vcap["mongodb-1.8"]
-    connString = connString[0]["credentials"]
-    connString = "mongodb://#{connString.hostname}:#{connString.port}/#{connString.db}"
-    mongoDb = mongo.db connString, {fsync: false}
 
-    # Delete demo maps created by users older than 2 hours.
+
+    # Delete demo maps created by users older than 4 hours.
     deleteMaps = ->
-        minDate = moment().subtract("h", 2).toJSON()
-        options = {$and: [{dateCreated: {$lt: minDate}}, {isReadOnly: false}]}
+        minDate = moment().utc().subtract("h", 4).toJSON()
+        options = {$and: [{dateCreated: {$lt: minDate}}, {isReadOnly: {$ne: true}}]}
         mongoDb.collection("map").remove options, (err, result) =>
             if err?
                 lastMongoDelete = JSON.stringify err
